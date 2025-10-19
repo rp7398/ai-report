@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI & Generative AI: An Interactive Exploration</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals & Slate -->
+    <!-- Application Structure Plan: The application is designed with a fixed sidebar navigation for seamless access to major themes, transforming a dense, multi-page report into a manageable, non-linear experience. This structure was chosen over a long scroll to prevent user fatigue and allow direct exploration of topics of interest. The main content area is dynamically updated. Key interactions include tabbed content, filterable grids, and interactive charts that respond to user selections, encouraging active learning rather than passive reading. This user-centric design prioritizes clarity and exploration for a complex subject. -->
+    <!-- Visualization & Content Choices: 
+        - History Timeline (Inform): HTML/CSS/JS -> User clicks to reveal info on key events. Justification: More engaging than a static list.
+        - AI Scopes (Organize): Nested HTML divs -> Visually shows relationship between AI, ML, DL. Justification: Immediately clarifies hierarchy.
+        - ML Types (Compare): Tabs + Donut Charts (Chart.js) -> Compare use-cases for Supervised, Unsupervised, and Reinforcement learning. Justification: Direct comparison of complex topics in a simple visual format.
+        - Model Growth (Change): Line Chart (Chart.js) -> Shows exponential growth of LLM parameters. Justification: Effectively visualizes the trend of increasing model complexity.
+        - Industry Applications (Organize/Inform): Filterable Grid of Cards + Bar Charts (Chart.js) -> Users filter by industry to see specific applications and market data. Justification: Allows personalized exploration of AI's impact.
+        - Ethical Issues (Organize/Inform): Accordion UI -> Presents complex ethical topics in digestible sections. Justification: Avoids overwhelming the user with dense text.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8F7F4; /* Warm Ivory */
+            color: #334155; /* Slate 700 */
+        }
+        .sidebar-link {
+            transition: all 0.2s ease-in-out;
+            border-left: 3px solid transparent;
+        }
+        .sidebar-link.active, .sidebar-link:hover {
+            background-color: #E2E8F0; /* Slate 200 */
+            border-left-color: #475569; /* Slate 600 */
+            color: #1E293B; /* Slate 800 */
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #E2E8F0;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #94A3B8;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748B;
+        }
+        .tab-button.active {
+            background-color: #334155;
+            color: #F8F7F4;
+        }
+        .filter-button.active {
+            background-color: #334155;
+            color: #F8F7F4;
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        .timeline-item-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden">
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="w-64 bg-slate-100 p-4 space-y-2 flex-shrink-0 overflow-y-auto">
+        <h1 class="text-2xl font-bold text-slate-800 pb-4 border-b border-slate-300">AI Explorer</h1>
+        <nav>
+            <a href="#introduction" class="sidebar-link block font-semibold p-3 rounded-lg text-slate-600 active" data-section="introduction">
+                Introduction to AI
+            </a>
+            <a href="#types" class="sidebar-link block font-semibold p-3 rounded-lg text-slate-600" data-section="types">
+                Types of AI
+            </a>
+            <a href="#ml-deep-dive" class="sidebar-link block font-semibold p-3 rounded-lg text-slate-600" data-section="ml-deep-dive">
+                Machine Learning Deep Dive
+            </a>
+            <a href="#gen-ai" class="sidebar-link block font-semibold p-3 rounded-lg text-slate-600" data-section="gen-ai">
+                The Generative AI Revolution
+            </a>
+            <a href="#applications" class="sidebar-link block font-semibold p-3 rounded-lg text-slate-600" data-section="applications">
+                Applications & Impact
+            </a>
+            <a href="#ethics" class="sidebar-link block font-semibold p-3 rounded-lg text-slate-600" data-section="ethics">
+                Ethical Considerations
+            </a>
+            <a href="#future" class="sidebar-link block font-semibold p-3 rounded-lg text-slate-600" data-section="future">
+                The Future of AI
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main id="main-content" class="flex-1 p-6 lg:p-10 overflow-y-auto">
+        
+        <!-- Section: Introduction to AI -->
+        <section id="introduction" class="content-section active">
+            <h2 class="text-4xl font-bold text-slate-800 mb-4">What is Artificial Intelligence?</h2>
+            <p class="text-lg text-slate-600 mb-8 max-w-4xl">
+                This section provides a foundational understanding of Artificial Intelligence, from its core definition to its historical milestones. AI is a broad field of computer science dedicated to creating systems that can perform tasks that typically require human intelligence. This includes learning, reasoning, problem-solving, perception, and language understanding. Explore the interactive timeline below to see how the field has evolved from theoretical concepts to the powerful applications we see today.
+            </p>
+
+            <div class="bg-white p-6 rounded-xl shadow-md">
+                <h3 class="text-2xl font-bold text-slate-800 mb-4">A Brief History of AI</h3>
+                <div id="timeline-container" class="relative border-l-2 border-slate-300 ml-4 py-4">
+                    <!-- Timeline items will be injected here by JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Types of AI -->
+        <section id="types" class="content-section">
+            <h2 class="text-4xl font-bold text-slate-800 mb-4">Understanding the Types of AI</h2>
+            <p class="text-lg text-slate-600 mb-8 max-w-4xl">
+                AI is not a single entity but a spectrum of technologies with varying capabilities and complexities. This section breaks down AI into its major categories, helping to clarify the distinctions between the AI in sci-fi and the AI we use daily. We'll explore the scopes of AI (from narrow to superintelligence) and the functional classifications that define how AI systems operate and "think".
+            </p>
+
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-xl shadow-md">
+                    <h3 class="text-2xl font-bold text-slate-800 mb-4">Scopes of AI</h3>
+                     <div id="ai-scopes-container" class="space-y-4">
+                        <div class="p-4 border border-slate-300 rounded-lg bg-slate-50">
+                            <h4 class="font-bold text-lg text-slate-700">Artificial Narrow Intelligence (ANI)</h4>
+                            <p class="text-slate-600">Specializes in one task (e.g., voice assistants, image recognition). This is the only type of AI we have achieved so far.</p>
+                        </div>
+                        <div class="p-4 border border-slate-300 rounded-lg bg-slate-50">
+                            <h4 class="font-bold text-lg text-slate-700">Artificial General Intelligence (AGI)</h4>
+                            <p class="text-slate-600">A hypothetical AI with human-level cognitive abilities, able to understand, learn, and apply knowledge across a wide range of tasks.</p>
+                        </div>
+                        <div class="p-4 border border-slate-300 rounded-lg bg-slate-50">
+                            <h4 class="font-bold text-lg text-slate-700">Artificial Superintelligence (ASI)</h4>
+                            <p class="text-slate-600">A hypothetical AI that surpasses human intelligence and ability in virtually every field, including scientific creativity and social skills.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md">
+                    <h3 class="text-2xl font-bold text-slate-800 mb-4">AI, Machine Learning & Deep Learning</h3>
+                    <div class="w-full h-full flex items-center justify-center p-4">
+                        <div class="w-full max-w-sm aspect-square rounded-full bg-slate-200 flex items-center justify-center p-4 text-center">
+                            <strong class="text-slate-700">Artificial Intelligence</strong>
+                            <div class="w-3/4 aspect-square rounded-full bg-slate-300 flex items-center justify-center p-4">
+                                <strong class="text-slate-700">Machine Learning</strong>
+                                <div class="w-1/2 aspect-square rounded-full bg-slate-400 flex items-center justify-center p-4">
+                                    <strong class="text-slate-800">Deep Learning</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-center text-slate-600 mt-4">This diagram illustrates that Deep Learning is a subset of Machine Learning, which is itself a subset of the broader field of Artificial Intelligence.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Machine Learning Deep Dive -->
+        <section id="ml-deep-dive" class="content-section">
+            <h2 class="text-4xl font-bold text-slate-800 mb-4">Machine Learning Deep Dive</h2>
+            <p class="text-lg text-slate-600 mb-8 max-w-4xl">
+                Machine Learning (ML) is the engine powering most modern AI advancements. Instead of being explicitly programmed, ML algorithms learn patterns from data. This section explores the three primary paradigms of machine learning. Use the tabs below to switch between Supervised, Unsupervised, and Reinforcement Learning, and see a breakdown of their common applications in the accompanying chart.
+            </p>
+            <div class="bg-white p-6 rounded-xl shadow-md">
+                <div class="flex border-b border-slate-300 mb-4">
+                    <button class="tab-button py-2 px-4 font-semibold text-slate-600 active" data-tab="supervised">Supervised Learning</button>
+                    <button class="tab-button py-2 px-4 font-semibold text-slate-600" data-tab="unsupervised">Unsupervised Learning</button>
+                    <button class="tab-button py-2 px-4 font-semibold text-slate-600" data-tab="reinforcement">Reinforcement Learning</button>
+                </div>
+                <div class="grid lg:grid-cols-2 gap-8 items-center">
+                    <div>
+                        <div id="supervised-content" class="tab-content">
+                            <h3 class="text-2xl font-bold text-slate-700 mb-2">Learning from Labeled Data</h3>
+                            <p class="text-slate-600">In supervised learning, the algorithm is trained on a dataset where each data point is "labeled" with the correct output. It's like a student learning with a teacher and an answer key. The goal is to learn a mapping function that can predict the output for new, unseen data.</p>
+                            <ul class="list-disc list-inside mt-4 text-slate-600 space-y-1">
+                                <li><strong>Classification:</strong> Predicting a category (e.g., spam vs. not spam).</li>
+                                <li><strong>Regression:</strong> Predicting a continuous value (e.g., house prices).</li>
+                            </ul>
+                        </div>
+                        <div id="unsupervised-content" class="tab-content hidden">
+                             <h3 class="text-2xl font-bold text-slate-700 mb-2">Finding Patterns in Unlabeled Data</h3>
+                            <p class="text-slate-600">Here, the algorithm works with data that has no predefined labels. It tries to find hidden patterns, structures, or relationships on its own. It's like a researcher looking for connections in a sea of information without prior guidance.</p>
+                            <ul class="list-disc list-inside mt-4 text-slate-600 space-y-1">
+                                <li><strong>Clustering:</strong> Grouping similar data points together (e.g., customer segmentation).</li>
+                                <li><strong>Association:</strong> Discovering rules that describe large portions of data (e.g., market basket analysis).</li>
+                            </ul>
+                        </div>
+                         <div id="reinforcement-content" class="tab-content hidden">
+                            <h3 class="text-2xl font-bold text-slate-700 mb-2">Learning through Trial and Error</h3>
+                            <p class="text-slate-600">This type of learning involves an "agent" that interacts with an environment and learns to take actions to maximize a cumulative reward. It's like training a pet with treats. The agent learns the best strategy (policy) through repeated trial and error.</p>
+                            <ul class="list-disc list-inside mt-4 text-slate-600 space-y-1">
+                                <li><strong>Game Playing:</strong> Mastering games like Chess or Go.</li>
+                                <li><strong>Robotics:</strong> Teaching robots to perform complex tasks.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="mlChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: The Generative AI Revolution -->
+        <section id="gen-ai" class="content-section">
+            <h2 class="text-4xl font-bold text-slate-800 mb-4">The Generative AI Revolution</h2>
+            <p class="text-lg text-slate-600 mb-8 max-w-4xl">
+                Generative AI represents a major leap forward, focusing on creating new, original content rather than just analyzing or classifying existing data. This includes text, images, music, and code. This section delves into the models that power this revolution, like Large Language Models (LLMs), and visualizes the staggering growth in their complexity over the past few years.
+            </p>
+            <div class="grid lg:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-xl shadow-md">
+                     <h3 class="text-2xl font-bold text-slate-800 mb-4">Core Concepts</h3>
+                     <div class="space-y-4">
+                        <div>
+                            <h4 class="font-semibold text-lg text-slate-700">Large Language Models (LLMs)</h4>
+                            <p class="text-slate-600">LLMs, like GPT-4, are trained on vast amounts of text data to understand and generate human-like language. They are based on the Transformer architecture, which allows them to process long sequences of text and understand context.</p>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-lg text-slate-700">Diffusion Models</h4>
+                            <p class="text-slate-600">Used for image generation, these models start with random noise and gradually refine it into a coherent image that matches a text prompt. This step-by-step process allows for high-quality, detailed outputs.</p>
+                        </div>
+                         <div>
+                            <h4 class="font-semibold text-lg text-slate-700">Prompts & Training</h4>
+                            <p class="text-slate-600">The quality of generative AI output heavily depends on the user's input ("prompt") and the massive datasets used for training. "Prompt engineering" is the art of crafting effective inputs to get desired outputs.</p>
+                        </div>
+                     </div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md">
+                    <h3 class="text-2xl font-bold text-slate-800 mb-4">The Growth of Model Size</h3>
+                    <p class="text-slate-600 mb-4">The number of parameters in a model is a rough measure of its complexity and potential capability. This chart shows the exponential increase in parameters for prominent language models.</p>
+                    <div class="chart-container h-96">
+                        <canvas id="modelGrowthChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Applications & Impact -->
+        <section id="applications" class="content-section">
+            <h2 class="text-4xl font-bold text-slate-800 mb-4">Applications & Impact on Industries</h2>
+            <p class="text-lg text-slate-600 mb-8 max-w-4xl">
+                AI is no longer a futuristic concept; it is a transformative force reshaping industries across the globe. From diagnosing diseases to creating art, AI's applications are vast and growing. This section provides an interactive overview of AI's impact. Use the filters to explore specific sectors and click on any card to see a visualization of its projected market growth.
+            </p>
+            <div class="bg-white p-6 rounded-xl shadow-md">
+                <div id="industry-filters" class="flex flex-wrap gap-2 mb-6">
+                    <button class="filter-button bg-slate-200 text-slate-700 font-semibold py-2 px-4 rounded-full active" data-filter="all">All</button>
+                    <button class="filter-button bg-slate-200 text-slate-700 font-semibold py-2 px-4 rounded-full" data-filter="Healthcare">Healthcare</button>
+                    <button class="filter-button bg-slate-200 text-slate-700 font-semibold py-2 px-4 rounded-full" data-filter="Finance">Finance</button>
+                    <button class="filter-button bg-slate-200 text-slate-700 font-semibold py-2 px-4 rounded-full" data-filter="Entertainment">Entertainment</button>
+                    <button class="filter-button bg-slate-200 text-slate-700 font-semibold py-2 px-4 rounded-full" data-filter="Automotive">Automotive</button>
+                </div>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6" id="applications-grid">
+                    <!-- Application cards will be injected by JS -->
+                </div>
+                <div id="application-chart-container" class="mt-8 hidden">
+                     <h3 class="text-2xl font-bold text-slate-800 mb-4 text-center" id="chart-title"></h3>
+                    <div class="chart-container">
+                        <canvas id="industryGrowthChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Ethical Considerations -->
+        <section id="ethics" class="content-section">
+            <h2 class="text-4xl font-bold text-slate-800 mb-4">Ethical Considerations & Challenges</h2>
+            <p class="text-lg text-slate-600 mb-8 max-w-4xl">
+                The rapid advancement of AI brings a host of complex ethical questions and societal challenges that we must address. Developing AI responsibly requires careful consideration of its potential negative impacts. This section explores the most critical ethical dilemmas, from algorithmic bias to the future of work. Click on each topic to expand and learn more about the associated challenges and the ongoing dialogue surrounding them.
+            </p>
+            <div id="accordion-container" class="space-y-4 max-w-4xl mx-auto">
+                <!-- Accordion items injected by JS -->
+            </div>
+        </section>
+
+        <!-- Section: The Future of AI -->
+        <section id="future" class="content-section">
+            <h2 class="text-4xl font-bold text-slate-800 mb-4">The Future of AI</h2>
+            <p class="text-lg text-slate-600 mb-8 max-w-4xl">
+                Looking ahead, the trajectory of AI promises even more profound changes to our world. The pursuit of Artificial General Intelligence (AGI), the deepening of human-AI collaboration, and breakthroughs in new algorithms will define the next era. This section outlines the key trends and future directions that researchers and developers are exploring, painting a picture of what a future integrated with advanced AI might look like.
+            </p>
+            <div class="bg-white p-8 rounded-xl shadow-md">
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div>
+                        <h3 class="text-2xl font-bold text-slate-800 mb-4">Key Future Trends</h3>
+                        <ul class="space-y-4">
+                            <li class="flex items-start">
+                                <span class="text-xl font-bold text-slate-500 mr-4 mt-1">&#10148;</span>
+                                <div>
+                                    <h4 class="font-semibold text-lg text-slate-700">Explainable AI (XAI)</h4>
+                                    <p class="text-slate-600">Developing AI models that can explain their decisions and processes in human-understandable terms, moving away from "black box" systems to build trust and accountability.</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-xl font-bold text-slate-500 mr-4 mt-1">&#10148;</span>
+                                <div>
+                                    <h4 class="font-semibold text-lg text-slate-700">AI for Scientific Discovery</h4>
+                                    <p class="text-slate-600">Using AI to accelerate research in fields like medicine, climate science, and material science by analyzing vast datasets and modeling complex systems.</p>
+                                </div>
+                            </li>
+                             <li class="flex items-start">
+                                <span class="text-xl font-bold text-slate-500 mr-4 mt-1">&#10148;</span>
+                                <div>
+                                    <h4 class="font-semibold text-lg text-slate-700">Human-AI Collaboration</h4>
+                                    <p class="text-slate-600">Shifting the focus from AI as a replacement for humans to AI as a tool that augments human creativity, decision-making, and productivity.</p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div>
+                         <h3 class="text-2xl font-bold text-slate-800 mb-4">The Road to AGI</h3>
+                        <p class="text-slate-600 mb-4">The path to Artificial General Intelligence is one of the most significant and challenging goals in computer science. It requires breakthroughs in areas like:</p>
+                        <ul class="list-disc list-inside text-slate-600 space-y-2">
+                            <li><strong>Common Sense Reasoning:</strong> Imbuing AI with the implicit understanding of the world that humans possess.</li>
+                            <li><strong>Transfer Learning:</strong> The ability to apply knowledge gained from one task to a different, unrelated task.</li>
+                            <li><strong>Robustness & Adaptability:</strong> Creating systems that can handle novel situations and unforeseen circumstances gracefully.</li>
+                        </ul>
+                         <p class="text-slate-600 mt-4">While true AGI is likely still decades away, each step towards it unlocks more powerful and capable forms of narrow AI.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const sidebarLinks = document.querySelectorAll('.sidebar-link');
+            const contentSections = document.querySelectorAll('.content-section');
+            let mlChartInstance;
+            let modelGrowthChartInstance;
+            let industryGrowthChartInstance;
+
+            // Data for charts and dynamic content
+            const timelineData = [
+                { year: "1950", title: "Turing Test", content: "Alan Turing proposes a test for machine intelligence, now known as the Turing Test." },
+                { year: "1956", title: "Dartmouth Workshop", content: "The term 'Artificial Intelligence' is coined by John McCarthy at a workshop, marking the birth of AI as a field." },
+                { year: "1966", title: "ELIZA", content: "The first chatbot, ELIZA, is created at MIT, simulating a conversation with a psychotherapist." },
+                { year: "1997", title: "Deep Blue vs. Kasparov", content: "IBM's Deep Blue chess computer defeats world champion Garry Kasparov, a major milestone for AI in strategic games." },
+                { year: "2011", title: "Watson on Jeopardy!", content: "IBM's Watson AI wins the quiz show Jeopardy!, showcasing advances in natural language processing." },
+                { year: "2017", title: "Transformers", content: "Google researchers publish the 'Attention Is All You Need' paper, introducing the Transformer architecture that underpins modern LLMs." },
+                { year: "2022", title: "Generative AI Boom", content: "Release of powerful generative models like DALL-E 2 and ChatGPT brings AI capabilities to the public, sparking widespread interest and adoption." }
+            ];
+
+            const mlChartData = {
+                supervised: {
+                    labels: ['Spam Detection', 'Medical Diagnosis', 'Stock Prediction', 'Image Classification'],
+                    data: [35, 25, 20, 20]
+                },
+                unsupervised: {
+                    labels: ['Customer Segments', 'Anomaly Detection', 'Recommendation', 'Data Compression'],
+                    data: [40, 30, 20, 10]
+                },
+                reinforcement: {
+                    labels: ['Game AI', 'Robotics', 'Resource Mgmt.', 'Ad Serving'],
+                    data: [50, 25, 15, 10]
+                }
+            };
+            
+            const modelGrowthData = {
+                labels: ['2018 (BERT)', '2019 (GPT-2)', '2020 (GPT-3)', '2022 (PaLM)', '2023 (GPT-4)'],
+                datasets: [{
+                    label: 'Parameters (in Billions)',
+                    data: [0.34, 1.5, 175, 540, 1760],
+                    borderColor: '#334155',
+                    backgroundColor: 'rgba(51, 65, 85, 0.1)',
+                    fill: true,
+                    tension: 0.3
+                }]
+            };
+
+            const applicationsData = [
+                { category: 'Healthcare', title: 'AI-Powered Diagnostics', content: 'Utilizing ML to analyze medical images (X-rays, MRIs) for early disease detection.', growth: [28, 35, 44, 55, 70] },
+                { category: 'Healthcare', title: 'Personalized Treatment', content: 'Analyzing patient data to create tailored treatment plans and predict therapy outcomes.', growth: [28, 35, 44, 55, 70] },
+                { category: 'Finance', title: 'Algorithmic Trading', content: 'Using AI to execute trades at high speeds based on market data analysis.', growth: [18, 22, 27, 34, 42] },
+                { category: 'Finance', title: 'Fraud Detection', content: 'Identifying and preventing fraudulent transactions in real-time by spotting unusual patterns.', growth: [18, 22, 27, 34, 42] },
+                { category: 'Entertainment', title: 'Content Recommendation', content: 'Powering recommendation engines on platforms like Netflix and Spotify.', growth: [22, 28, 35, 45, 58] },
+                { category: 'Entertainment', title: 'Generative Art & Music', content: 'Creating novel images, music, and scripts using generative models.', growth: [22, 28, 35, 45, 58] },
+                { category: 'Automotive', title: 'Autonomous Vehicles', content: 'Developing self-driving capabilities using complex sensor data and decision-making algorithms.', growth: [30, 38, 48, 60, 75] },
+                { category: 'Automotive', title: 'Predictive Maintenance', content: 'Analyzing vehicle data to predict when parts will fail and schedule maintenance proactively.', growth: [30, 38, 48, 60, 75] },
+            ];
+
+            const ethicsData = [
+                 { title: "Algorithmic Bias", content: "AI models are trained on data, and if that data reflects existing societal biases (e.g., in hiring, loan applications, or criminal justice), the AI will learn and often amplify those biases. This can lead to unfair or discriminatory outcomes against certain groups. Ensuring fairness and equity in AI systems is a major technical and ethical challenge." },
+                { title: "Job Displacement & Future of Work", content: "AI and automation can perform many tasks more efficiently than humans, raising concerns about widespread job displacement. While new jobs will be created, there is a need for societal adaptation, including reskilling and upskilling the workforce, and rethinking the nature of work itself." },
+                { title: "Privacy and Surveillance", content: "AI's ability to process vast amounts of personal data—from facial recognition to online behavior—creates significant privacy risks. The potential for mass surveillance by governments or corporations necessitates strong regulations and transparent data handling practices to protect individual freedoms." },
+                { title: "Accountability and Transparency", content: "When an AI system makes a critical mistake (e.g., in a self-driving car accident or a medical misdiagnosis), who is responsible? Many complex AI models, especially deep learning systems, are considered 'black boxes' because their decision-making processes are difficult to interpret, making accountability a challenging issue." },
+                { title: "Security and Misuse", content: "AI technologies can be weaponized or used for malicious purposes, such as creating autonomous weapons, launching sophisticated cyberattacks, or generating realistic fake news ('deepfakes') to manipulate public opinion. Establishing global norms and safeguards against such misuse is crucial." }
+            ];
+
+            // Navigation handler
+            const navigateToSection = (sectionId) => {
+                sidebarLinks.forEach(link => {
+                    link.classList.toggle('active', link.dataset.section === sectionId);
+                });
+                contentSections.forEach(section => {
+                    section.classList.toggle('active', section.id === sectionId);
+                });
+
+                // Initialize or update charts for the active section
+                if (sectionId === 'ml-deep-dive' && !mlChartInstance) {
+                    renderMlChart('supervised');
+                }
+                if (sectionId === 'gen-ai' && !modelGrowthChartInstance) {
+                    renderModelGrowthChart();
+                }
+            };
+            
+            sidebarLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const sectionId = e.target.closest('a').dataset.section;
+                    navigateToSection(sectionId);
+                    document.getElementById('main-content').scrollTop = 0;
+                });
+            });
+
+            // Timeline Initialization
+            const timelineContainer = document.getElementById('timeline-container');
+            timelineData.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'mb-4 timeline-item cursor-pointer';
+                div.innerHTML = `
+                    <div class="flex items-center">
+                        <div class="absolute -left-2.5 w-5 h-5 bg-slate-400 rounded-full border-4 border-white"></div>
+                        <h4 class="ml-8 text-xl font-bold text-slate-700">${item.year} - ${item.title}</h4>
+                    </div>
+                    <div class="ml-8 mt-2 timeline-item-content">
+                        <p class="text-slate-600 p-3 bg-slate-50 rounded-md">${item.content}</p>
+                    </div>
+                `;
+                timelineContainer.appendChild(div);
+            });
+
+            timelineContainer.addEventListener('click', (e) => {
+                const item = e.target.closest('.timeline-item');
+                if (item) {
+                    const content = item.querySelector('.timeline-item-content');
+                    const isActive = content.style.maxHeight;
+                    // Close all others
+                    document.querySelectorAll('.timeline-item-content').forEach(c => c.style.maxHeight = null);
+                    // Open the clicked one if it was closed
+                    if (!isActive) {
+                       content.style.maxHeight = content.scrollHeight + "px";
+                    }
+                }
+            });
+
+            // ML Chart Logic
+            const mlTabs = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            function renderMlChart(type) {
+                const ctx = document.getElementById('mlChart').getContext('2d');
+                if (mlChartInstance) {
+                    mlChartInstance.destroy();
+                }
+                mlChartInstance = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: mlChartData[type].labels,
+                        datasets: [{
+                            label: 'Use Case Distribution',
+                            data: mlChartData[type].data,
+                            backgroundColor: ['#64748B', '#94A3B8', '#CBD5E1', '#E2E8F0'],
+                            borderColor: '#F8F7F4',
+                            borderWidth: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                            },
+                            title: {
+                                display: true,
+                                text: `${type.charAt(0).toUpperCase() + type.slice(1)} Learning Use Cases`,
+                                font: { size: 16 }
+                            }
+                        }
+                    }
+                });
+            }
+
+            mlTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabType = tab.dataset.tab;
+                    mlTabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    tabContents.forEach(content => {
+                        content.classList.toggle('hidden', !content.id.startsWith(tabType));
+                    });
+                    renderMlChart(tabType);
+                });
+            });
+
+            // Model Growth Chart
+            function renderModelGrowthChart() {
+                const ctx = document.getElementById('modelGrowthChart').getContext('2d');
+                modelGrowthChartInstance = new Chart(ctx, {
+                    type: 'line',
+                    data: modelGrowthData,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                type: 'logarithmic',
+                                title: {
+                                    display: true,
+                                    text: 'Parameters (Billions, Log Scale)'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Year of Release'
+                                }
+                            }
+                        },
+                         plugins: {
+                            legend: { display: false }
+                        }
+                    }
+                });
+            }
+
+            // Applications Logic
+            const applicationsGrid = document.getElementById('applications-grid');
+            const industryFilters = document.getElementById('industry-filters');
+            
+            function renderApplicationCards(filter = 'all') {
+                applicationsGrid.innerHTML = '';
+                const filteredData = filter === 'all' ? applicationsData : applicationsData.filter(app => app.category === filter);
+                
+                filteredData.forEach(app => {
+                    const card = document.createElement('div');
+                    card.className = 'application-card bg-slate-50 p-4 rounded-lg shadow-sm cursor-pointer hover:shadow-md transition-shadow';
+                    card.dataset.category = app.category;
+                    card.innerHTML = `
+                        <h4 class="font-bold text-lg text-slate-800">${app.title}</h4>
+                        <p class="text-slate-600 text-sm">${app.content}</p>
+                    `;
+                    applicationsGrid.appendChild(card);
+                });
+            }
+
+            industryFilters.addEventListener('click', (e) => {
+                if (e.target.tagName === 'BUTTON') {
+                    const filter = e.target.dataset.filter;
+                    document.querySelectorAll('.filter-button').forEach(btn => btn.classList.remove('active'));
+                    e.target.classList.add('active');
+                    renderApplicationCards(filter);
+                     document.getElementById('application-chart-container').classList.add('hidden');
+                }
+            });
+            
+            applicationsGrid.addEventListener('click', (e) => {
+                const card = e.target.closest('.application-card');
+                if (card) {
+                    const category = card.dataset.category;
+                    const data = applicationsData.find(app => app.category === category);
+                    renderIndustryChart(category, data.growth);
+                }
+            });
+            
+            function renderIndustryChart(category, growthData) {
+                const container = document.getElementById('application-chart-container');
+                container.classList.remove('hidden');
+                document.getElementById('chart-title').innerText = `Projected AI Market Growth in ${category} ($B)`;
+
+                const ctx = document.getElementById('industryGrowthChart').getContext('2d');
+                if (industryGrowthChartInstance) {
+                    industryGrowthChartInstance.destroy();
+                }
+                industryGrowthChartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['2023', '2024', '2025', '2026', '2027'],
+                        datasets: [{
+                            label: `Market Size ($B)`,
+                            data: growthData,
+                            backgroundColor: '#94A3B8',
+                            borderRadius: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } }
+                    }
+                });
+                 container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+
+            // Ethics Accordion
+            const accordionContainer = document.getElementById('accordion-container');
+            ethicsData.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'border border-slate-300 rounded-lg bg-white';
+                div.innerHTML = `
+                    <button class="accordion-toggle w-full flex justify-between items-center text-left p-4 font-bold text-slate-700 text-lg">
+                        <span>${item.title}</span>
+                        <span class="transform transition-transform duration-300 text-2xl font-light">+</span>
+                    </button>
+                    <div class="accordion-content">
+                        <p class="p-4 pt-0 text-slate-600">${item.content}</p>
+                    </div>
+                `;
+                accordionContainer.appendChild(div);
+            });
+            
+            accordionContainer.addEventListener('click', e => {
+                const toggle = e.target.closest('.accordion-toggle');
+                if (toggle) {
+                    const content = toggle.nextElementSibling;
+                    const icon = toggle.querySelector('span:last-child');
+                    const isOpen = content.style.maxHeight;
+
+                    // Close all
+                    document.querySelectorAll('.accordion-content').forEach(c => {
+                        c.style.maxHeight = null;
+                        c.previousElementSibling.querySelector('span:last-child').classList.remove('rotate-45');
+                    });
+                    
+                    if (!isOpen) {
+                        content.style.maxHeight = content.scrollHeight + 'px';
+                        icon.classList.add('rotate-45');
+                    }
+                }
+            });
+
+            // Initial load
+            navigateToSection('introduction');
+            renderApplicationCards();
+        });
+    </script>
+</body>
+</html>
