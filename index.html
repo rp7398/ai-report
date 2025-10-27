@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Chosen Palette: Warm Neutrals & Slate -->
-    <!-- Application Structure Plan: The application is designed with a fixed sidebar navigation for seamless access to major themes, transforming a dense, multi-page report into a manageable, non-linear experience. This structure was chosen over a long scroll to prevent user fatigue and allow direct exploration of topics of interest. The main content area is dynamically updated. Key interactions include tabbed content, filterable grids, and interactive charts that respond to user selections, encouraging active learning rather than passive reading. This user-centric design prioritizes clarity and exploration for a complex subject. -->
+    <!-- Application Structure Plan: The application uses a fixed, desktop-style sidebar for large screens. On mobile (md breakpoint and below), the sidebar is converted into an off-canvas, full-height overlay controlled by a hamburger button in a fixed mobile header. This structure was chosen to guarantee full screen width for the main content on mobile devices, preventing the overlap and horizontal scrolling issue previously reported. Navigation is non-linear and interactive elements encourage exploration across all screen sizes. -->
     <!-- Visualization & Content Choices: 
         - History Timeline (Inform): HTML/CSS/JS -> User clicks to reveal info on key events. Justification: More engaging than a static list.
         - AI Scopes (Organize): Nested HTML divs -> Visually shows relationship between AI, ML, DL. Justification: Immediately clarifies hierarchy.
@@ -25,6 +25,8 @@
             font-family: 'Inter', sans-serif;
             background-color: #F8F7F4; /* Warm Ivory */
             color: #334155; /* Slate 700 */
+            /* Ensure no horizontal scroll is possible anywhere */
+            overflow-x: hidden;
         }
         .sidebar-link {
             transition: all 0.2s ease-in-out;
@@ -35,6 +37,35 @@
             border-left-color: #475569; /* Slate 600 */
             color: #1E293B; /* Slate 800 */
         }
+        /* Mobile Sidebar specific styles */
+        #sidebar {
+            /* Default mobile state: fixed, off-screen, hidden on desktop */
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 50;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease-in-out;
+            width: 256px; /* w-64 */
+        }
+        #sidebar.open {
+            transform: translateX(0);
+        }
+        #sidebar-overlay.open {
+            display: block;
+        }
+        /* Desktop state: Static on md screens and above */
+        @media (min-width: 768px) {
+            #sidebar {
+                position: relative;
+                transform: translateX(0);
+                flex-shrink: 0;
+                display: block !important; /* Force visibility */
+                z-index: 30; /* Less important on desktop */
+            }
+        }
+
         .content-section {
             display: none;
         }
@@ -55,6 +86,7 @@
                 height: 400px;
             }
         }
+        /* Scrollbar styling */
         ::-webkit-scrollbar {
             width: 8px;
         }
@@ -88,263 +120,280 @@
         }
     </style>
 </head>
-<body class="flex h-screen overflow-hidden">
+<body class="min-h-screen">
 
-    <!-- Sidebar -->
-    <aside id="sidebar" class="w-64 bg-slate-100 p-4 space-y-2 flex-shrink-0 overflow-y-auto">
-        <h1 class="text-2xl font-bold text-slate-800 pb-4 border-b border-slate-300">AI Explorer</h1>
-        <nav>
-            <a href="#introduction" class="sidebar-link block font-semibold p-3 rounded-lg text-slate-600 active" data-section="introduction">
-                Introduction to AI
-            </a>
-            <a href="#types" class="sidebar-link block font-semibold p-3 rounded-lg text-slate-600" data-section="types">
-                Types of AI
-            </a>
-            <a href="#ml-deep-dive" class="sidebar-link block font-semibold p-3 rounded-lg text-slate-600" data-section="ml-deep-dive">
-                Machine Learning Deep Dive
-            </a>
-            <a href="#gen-ai" class="sidebar-link block font-semibold p-3 rounded-lg text-slate-600" data-section="gen-ai">
-                The Generative AI Revolution
-            </a>
-            <a href="#applications" class="sidebar-link block font-semibold p-3 rounded-lg text-slate-600" data-section="applications">
-                Applications & Impact
-            </a>
-            <a href="#ethics" class="sidebar-link block font-semibold p-3 rounded-lg text-slate-600" data-section="ethics">
-                Ethical Considerations
-            </a>
-            <a href="#future" class="sidebar-link block font-semibold p-3 rounded-lg text-slate-600" data-section="future">
-                The Future of AI
-            </a>
-        </nav>
-    </aside>
+    <!-- Mobile Overlay for Sidebar (Only visible on small screens when menu is open) -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden md:hidden"></div>
+    
+    <!-- Mobile Header (Visible on small screens, fixed to top) -->
+    <header class="bg-white p-4 shadow-md md:hidden flex justify-between items-center sticky top-0 z-30">
+        <h1 class="text-xl font-bold text-slate-800">AI Explorer</h1>
+        <button id="mobile-menu-button" class="text-slate-600 focus:outline-none p-2 rounded-lg bg-slate-100">
+            <!-- Simple Burger Icon -->
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+        </button>
+    </header>
 
-    <!-- Main Content -->
-    <main id="main-content" class="flex-1 p-6 lg:p-10 overflow-y-auto">
-        
-        <!-- Section: Introduction to AI -->
-        <section id="introduction" class="content-section active">
-            <h2 class="text-4xl font-bold text-slate-800 mb-4">What is Artificial Intelligence?</h2>
-            <p class="text-lg text-slate-600 mb-8 max-w-4xl">
-                This section provides a foundational understanding of Artificial Intelligence, from its core definition to its historical milestones. AI is a broad field of computer science dedicated to creating systems that can perform tasks that typically require human intelligence. This includes learning, reasoning, problem-solving, perception, and language understanding. Explore the interactive timeline below to see how the field has evolved from theoretical concepts to the powerful applications we see today.
-            </p>
+    <!-- Main Application Wrapper: Desktop (flex-row) and Mobile (flow after header) -->
+    <div class="flex flex-col md:flex-row md:h-screen md:overflow-hidden">
 
-            <div class="bg-white p-6 rounded-xl shadow-md">
-                <h3 class="text-2xl font-bold text-slate-800 mb-4">A Brief History of AI</h3>
-                <div id="timeline-container" class="relative border-l-2 border-slate-300 ml-4 py-4">
-                    <!-- Timeline items will be injected here by JS -->
-                </div>
-            </div>
-        </section>
+        <!-- Sidebar: Fixed overlay on mobile, static on desktop -->
+        <aside id="sidebar" class="bg-slate-100 p-4 space-y-2 flex-shrink-0">
+            <!-- Content duplicates desktop sidebar for clean mobile display -->
+            <h1 class="text-2xl font-bold text-slate-800 pb-4 border-b border-slate-300">AI Explorer</h1>
+            <nav>
+                <a href="#introduction" class="sidebar-link block font-semibold p-3 rounded-lg text-slate-600 active" data-section="introduction">
+                    Introduction to AI
+                </a>
+                <a href="#types" class="sidebar-link block font-semibold p-3 rounded-lg text-slate-600" data-section="types">
+                    Types of AI
+                </a>
+                <a href="#ml-deep-dive" class="sidebar-link block font-semibold p-3 rounded-lg text-slate-600" data-section="ml-deep-dive">
+                    Machine Learning Deep Dive
+                </a>
+                <a href="#gen-ai" class="sidebar-link block font-semibold p-3 rounded-lg text-slate-600" data-section="gen-ai">
+                    The Generative AI Revolution
+                </a>
+                <a href="#applications" class="sidebar-link block font-semibold p-3 rounded-lg text-slate-600" data-section="applications">
+                    Applications & Impact
+                </a>
+                <a href="#ethics" class="sidebar-link block font-semibold p-3 rounded-lg text-slate-600" data-section="ethics">
+                    Ethical Considerations
+                </a>
+                <a href="#future" class="sidebar-link block font-semibold p-3 rounded-lg text-slate-600" data-section="future">
+                    The Future of AI
+                </a>
+            </nav>
+        </aside>
 
-        <!-- Section: Types of AI -->
-        <section id="types" class="content-section">
-            <h2 class="text-4xl font-bold text-slate-800 mb-4">Understanding the Types of AI</h2>
-            <p class="text-lg text-slate-600 mb-8 max-w-4xl">
-                AI is not a single entity but a spectrum of technologies with varying capabilities and complexities. This section breaks down AI into its major categories, helping to clarify the distinctions between the AI in sci-fi and the AI we use daily. We'll explore the scopes of AI (from narrow to superintelligence) and the functional classifications that define how AI systems operate and "think".
-            </p>
+        <!-- Main Content -->
+        <main id="main-content" class="flex-1 p-6 lg:p-10 overflow-y-auto w-full">
+            
+            <!-- Section: Introduction to AI -->
+            <section id="introduction" class="content-section active">
+                <h2 class="text-4xl font-bold text-slate-800 mb-4">What is Artificial Intelligence?</h2>
+                <p class="text-lg text-slate-600 mb-8 max-w-4xl">
+                    This section provides a foundational understanding of Artificial Intelligence, from its core definition to its historical milestones. AI is a broad field of computer science dedicated to creating systems that can perform tasks that typically require human intelligence. This includes learning, reasoning, problem-solving, perception, and language understanding. Explore the interactive timeline below to see how the field has evolved from theoretical concepts to the powerful applications we see today.
+                </p>
 
-            <div class="grid md:grid-cols-2 gap-8">
                 <div class="bg-white p-6 rounded-xl shadow-md">
-                    <h3 class="text-2xl font-bold text-slate-800 mb-4">Scopes of AI</h3>
-                     <div id="ai-scopes-container" class="space-y-4">
-                        <div class="p-4 border border-slate-300 rounded-lg bg-slate-50">
-                            <h4 class="font-bold text-lg text-slate-700">Artificial Narrow Intelligence (ANI)</h4>
-                            <p class="text-slate-600">Specializes in one task (e.g., voice assistants, image recognition). This is the only type of AI we have achieved so far.</p>
-                        </div>
-                        <div class="p-4 border border-slate-300 rounded-lg bg-slate-50">
-                            <h4 class="font-bold text-lg text-slate-700">Artificial General Intelligence (AGI)</h4>
-                            <p class="text-slate-600">A hypothetical AI with human-level cognitive abilities, able to understand, learn, and apply knowledge across a wide range of tasks.</p>
-                        </div>
-                        <div class="p-4 border border-slate-300 rounded-lg bg-slate-50">
-                            <h4 class="font-bold text-lg text-slate-700">Artificial Superintelligence (ASI)</h4>
-                            <p class="text-slate-600">A hypothetical AI that surpasses human intelligence and ability in virtually every field, including scientific creativity and social skills.</p>
-                        </div>
+                    <h3 class="text-2xl font-bold text-slate-800 mb-4">A Brief History of AI</h3>
+                    <div id="timeline-container" class="relative border-l-2 border-slate-300 ml-4 py-4">
+                        <!-- Timeline items will be injected here by JS -->
                     </div>
                 </div>
-                <div class="bg-white p-6 rounded-xl shadow-md">
-                    <h3 class="text-2xl font-bold text-slate-800 mb-4">AI, Machine Learning & Deep Learning</h3>
-                    <div class="w-full h-full flex items-center justify-center p-4">
-                        <div class="w-full max-w-sm aspect-square rounded-full bg-slate-200 flex items-center justify-center p-4 text-center">
-                            <strong class="text-slate-700">Artificial Intelligence</strong>
-                            <div class="w-3/4 aspect-square rounded-full bg-slate-300 flex items-center justify-center p-4">
-                                <strong class="text-slate-700">Machine Learning</strong>
-                                <div class="w-1/2 aspect-square rounded-full bg-slate-400 flex items-center justify-center p-4">
-                                    <strong class="text-slate-800">Deep Learning</strong>
-                                </div>
+            </section>
+
+            <!-- Section: Types of AI -->
+            <section id="types" class="content-section">
+                <h2 class="text-4xl font-bold text-slate-800 mb-4">Understanding the Types of AI</h2>
+                <p class="text-lg text-slate-600 mb-8 max-w-4xl">
+                    AI is not a single entity but a spectrum of technologies with varying capabilities and complexities. This section breaks down AI into its major categories, helping to clarify the distinctions between the AI in sci-fi and the AI we use daily. We'll explore the scopes of AI (from narrow to superintelligence) and the functional classifications that define how AI systems operate and "think".
+                </p>
+
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <h3 class="text-2xl font-bold text-slate-800 mb-4">Scopes of AI</h3>
+                         <div id="ai-scopes-container" class="space-y-4">
+                            <div class="p-4 border border-slate-300 rounded-lg bg-slate-50">
+                                <h4 class="font-bold text-lg text-slate-700">Artificial Narrow Intelligence (ANI)</h4>
+                                <p class="text-slate-600">Specializes in one task (e.g., voice assistants, image recognition). This is the only type of AI we have achieved so far.</p>
+                            </div>
+                            <div class="p-4 border border-slate-300 rounded-lg bg-slate-50">
+                                <h4 class="font-bold text-lg text-slate-700">Artificial General Intelligence (AGI)</h4>
+                                <p class="text-slate-600">A hypothetical AI with human-level cognitive abilities, able to understand, learn, and apply knowledge across a wide range of tasks.</p>
+                            </div>
+                            <div class="p-4 border border-slate-300 rounded-lg bg-slate-50">
+                                <h4 class="font-bold text-lg text-slate-700">Artificial Superintelligence (ASI)</h4>
+                                <p class="text-slate-600">A hypothetical AI that surpasses human intelligence and ability in virtually every field, including scientific creativity and social skills.</p>
                             </div>
                         </div>
                     </div>
-                    <p class="text-center text-slate-600 mt-4">This diagram illustrates that Deep Learning is a subset of Machine Learning, which is itself a subset of the broader field of Artificial Intelligence.</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- Section: Machine Learning Deep Dive -->
-        <section id="ml-deep-dive" class="content-section">
-            <h2 class="text-4xl font-bold text-slate-800 mb-4">Machine Learning Deep Dive</h2>
-            <p class="text-lg text-slate-600 mb-8 max-w-4xl">
-                Machine Learning (ML) is the engine powering most modern AI advancements. Instead of being explicitly programmed, ML algorithms learn patterns from data. This section explores the three primary paradigms of machine learning. Use the tabs below to switch between Supervised, Unsupervised, and Reinforcement Learning, and see a breakdown of their common applications in the accompanying chart.
-            </p>
-            <div class="bg-white p-6 rounded-xl shadow-md">
-                <div class="flex border-b border-slate-300 mb-4">
-                    <button class="tab-button py-2 px-4 font-semibold text-slate-600 active" data-tab="supervised">Supervised Learning</button>
-                    <button class="tab-button py-2 px-4 font-semibold text-slate-600" data-tab="unsupervised">Unsupervised Learning</button>
-                    <button class="tab-button py-2 px-4 font-semibold text-slate-600" data-tab="reinforcement">Reinforcement Learning</button>
-                </div>
-                <div class="grid lg:grid-cols-2 gap-8 items-center">
-                    <div>
-                        <div id="supervised-content" class="tab-content">
-                            <h3 class="text-2xl font-bold text-slate-700 mb-2">Learning from Labeled Data</h3>
-                            <p class="text-slate-600">In supervised learning, the algorithm is trained on a dataset where each data point is "labeled" with the correct output. It's like a student learning with a teacher and an answer key. The goal is to learn a mapping function that can predict the output for new, unseen data.</p>
-                            <ul class="list-disc list-inside mt-4 text-slate-600 space-y-1">
-                                <li><strong>Classification:</strong> Predicting a category (e.g., spam vs. not spam).</li>
-                                <li><strong>Regression:</strong> Predicting a continuous value (e.g., house prices).</li>
-                            </ul>
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <h3 class="text-2xl font-bold text-slate-800 mb-4">AI, Machine Learning & Deep Learning</h3>
+                        <div class="w-full h-full flex items-center justify-center p-4">
+                            <div class="w-full max-w-sm aspect-square rounded-full bg-slate-200 flex items-center justify-center p-4 text-center">
+                                <strong class="text-slate-700">Artificial Intelligence</strong>
+                                <div class="w-3/4 aspect-square rounded-full bg-slate-300 flex items-center justify-center p-4">
+                                    <strong class="text-slate-700">Machine Learning</strong>
+                                    <div class="w-1/2 aspect-square rounded-full bg-slate-400 flex items-center justify-center p-4">
+                                        <strong class="text-slate-800">Deep Learning</strong>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div id="unsupervised-content" class="tab-content hidden">
-                             <h3 class="text-2xl font-bold text-slate-700 mb-2">Finding Patterns in Unlabeled Data</h3>
-                            <p class="text-slate-600">Here, the algorithm works with data that has no predefined labels. It tries to find hidden patterns, structures, or relationships on its own. It's like a researcher looking for connections in a sea of information without prior guidance.</p>
-                            <ul class="list-disc list-inside mt-4 text-slate-600 space-y-1">
-                                <li><strong>Clustering:</strong> Grouping similar data points together (e.g., customer segmentation).</li>
-                                <li><strong>Association:</strong> Discovering rules that describe large portions of data (e.g., market basket analysis).</li>
-                            </ul>
-                        </div>
-                         <div id="reinforcement-content" class="tab-content hidden">
-                            <h3 class="text-2xl font-bold text-slate-700 mb-2">Learning through Trial and Error</h3>
-                            <p class="text-slate-600">This type of learning involves an "agent" that interacts with an environment and learns to take actions to maximize a cumulative reward. It's like training a pet with treats. The agent learns the best strategy (policy) through repeated trial and error.</p>
-                            <ul class="list-disc list-inside mt-4 text-slate-600 space-y-1">
-                                <li><strong>Game Playing:</strong> Mastering games like Chess or Go.</li>
-                                <li><strong>Robotics:</strong> Teaching robots to perform complex tasks.</li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="chart-container">
-                        <canvas id="mlChart"></canvas>
+                        <p class="text-center text-slate-600 mt-4">This diagram illustrates that Deep Learning is a subset of Machine Learning, which is itself a subset of the broader field of Artificial Intelligence.</p>
                     </div>
                 </div>
-            </div>
-        </section>
+            </section>
 
-        <!-- Section: The Generative AI Revolution -->
-        <section id="gen-ai" class="content-section">
-            <h2 class="text-4xl font-bold text-slate-800 mb-4">The Generative AI Revolution</h2>
-            <p class="text-lg text-slate-600 mb-8 max-w-4xl">
-                Generative AI represents a major leap forward, focusing on creating new, original content rather than just analyzing or classifying existing data. This includes text, images, music, and code. This section delves into the models that power this revolution, like Large Language Models (LLMs), and visualizes the staggering growth in their complexity over the past few years.
-            </p>
-            <div class="grid lg:grid-cols-2 gap-8">
+            <!-- Section: Machine Learning Deep Dive -->
+            <section id="ml-deep-dive" class="content-section">
+                <h2 class="text-4xl font-bold text-slate-800 mb-4">Machine Learning Deep Dive</h2>
+                <p class="text-lg text-slate-600 mb-8 max-w-4xl">
+                    Machine Learning (ML) is the engine powering most modern AI advancements. Instead of being explicitly programmed, ML algorithms learn patterns from data. This section explores the three primary paradigms of machine learning. Use the tabs below to switch between Supervised, Unsupervised, and Reinforcement Learning, and see a breakdown of their common applications in the accompanying chart.
+                </p>
                 <div class="bg-white p-6 rounded-xl shadow-md">
-                     <h3 class="text-2xl font-bold text-slate-800 mb-4">Core Concepts</h3>
-                     <div class="space-y-4">
+                    <div class="flex border-b border-slate-300 mb-4">
+                        <button class="tab-button py-2 px-4 font-semibold text-slate-600 active" data-tab="supervised">Supervised Learning</button>
+                        <button class="tab-button py-2 px-4 font-semibold text-slate-600" data-tab="unsupervised">Unsupervised Learning</button>
+                        <button class="tab-button py-2 px-4 font-semibold text-slate-600" data-tab="reinforcement">Reinforcement Learning</button>
+                    </div>
+                    <div class="grid lg:grid-cols-2 gap-8 items-center">
                         <div>
-                            <h4 class="font-semibold text-lg text-slate-700">Large Language Models (LLMs)</h4>
-                            <p class="text-slate-600">LLMs, like GPT-4, are trained on vast amounts of text data to understand and generate human-like language. They are based on the Transformer architecture, which allows them to process long sequences of text and understand context.</p>
+                            <div id="supervised-content" class="tab-content">
+                                <h3 class="text-2xl font-bold text-slate-700 mb-2">Learning from Labeled Data</h3>
+                                <p class="text-slate-600">In supervised learning, the algorithm is trained on a dataset where each data point is "labeled" with the correct output. It's like a student learning with a teacher and an answer key. The goal is to learn a mapping function that can predict the output for new, unseen data.</p>
+                                <ul class="list-disc list-inside mt-4 text-slate-600 space-y-1">
+                                    <li><strong>Classification:</strong> Predicting a category (e.g., spam vs. not spam).</li>
+                                    <li><strong>Regression:</strong> Predicting a continuous value (e.g., house prices).</li>
+                                </ul>
+                            </div>
+                            <div id="unsupervised-content" class="tab-content hidden">
+                                 <h3 class="text-2xl font-bold text-slate-700 mb-2">Finding Patterns in Unlabeled Data</h3>
+                                <p class="text-slate-600">Here, the algorithm works with data that has no predefined labels. It tries to find hidden patterns, structures, or relationships on its own. It's like a researcher looking for connections in a sea of information without prior guidance.</p>
+                                <ul class="list-disc list-inside mt-4 text-slate-600 space-y-1">
+                                    <li><strong>Clustering:</strong> Grouping similar data points together (e.g., customer segmentation).</li>
+                                    <li><strong>Association:</strong> Discovering rules that describe large portions of data (e.g., market basket analysis).</li>
+                                </ul>
+                            </div>
+                             <div id="reinforcement-content" class="tab-content hidden">
+                                <h3 class="text-2xl font-bold text-slate-700 mb-2">Learning through Trial and Error</h3>
+                                <p class="text-slate-600">This type of learning involves an "agent" that interacts with an environment and learns to take actions to maximize a cumulative reward. It's like training a pet with treats. The agent learns the best strategy (policy) through repeated trial and error.</p>
+                                <ul class="list-disc list-inside mt-4 text-slate-600 space-y-1">
+                                    <li><strong>Game Playing:</strong> Mastering games like Chess or Go.</li>
+                                    <li><strong>Robotics:</strong> Teaching robots to perform complex tasks.</li>
+                                </ul>
+                            </div>
                         </div>
-                        <div>
-                            <h4 class="font-semibold text-lg text-slate-700">Diffusion Models</h4>
-                            <p class="text-slate-600">Used for image generation, these models start with random noise and gradually refine it into a coherent image that matches a text prompt. This step-by-step process allows for high-quality, detailed outputs.</p>
+                        <div class="chart-container">
+                            <canvas id="mlChart"></canvas>
                         </div>
-                         <div>
-                            <h4 class="font-semibold text-lg text-slate-700">Prompts & Training</h4>
-                            <p class="text-slate-600">The quality of generative AI output heavily depends on the user's input ("prompt") and the massive datasets used for training. "Prompt engineering" is the art of crafting effective inputs to get desired outputs.</p>
-                        </div>
-                     </div>
+                    </div>
                 </div>
+            </section>
+
+            <!-- Section: The Generative AI Revolution -->
+            <section id="gen-ai" class="content-section">
+                <h2 class="text-4xl font-bold text-slate-800 mb-4">The Generative AI Revolution</h2>
+                <p class="text-lg text-slate-600 mb-8 max-w-4xl">
+                    Generative AI represents a major leap forward, focusing on creating new, original content rather than just analyzing or classifying existing data. This includes text, images, music, and code. This section delves into the models that power this revolution, like Large Language Models (LLMs), and visualizes the staggering growth in their complexity over the past few years.
+                </p>
+                <div class="grid lg:grid-cols-2 gap-8">
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                         <h3 class="text-2xl font-bold text-slate-800 mb-4">Core Concepts</h3>
+                         <div class="space-y-4">
+                            <div>
+                                <h4 class="font-semibold text-lg text-slate-700">Large Language Models (LLMs)</h4>
+                                <p class="text-slate-600">LLMs, like GPT-4, are trained on vast amounts of text data to understand and generate human-like language. They are based on the Transformer architecture, which allows them to process long sequences of text and understand context.</p>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-lg text-slate-700">Diffusion Models</h4>
+                                <p class="text-slate-600">Used for image generation, these models start with random noise and gradually refine it into a coherent image that matches a text prompt. This step-by-step process allows for high-quality, detailed outputs.</p>
+                            </div>
+                             <div>
+                                <h4 class="font-semibold text-lg text-slate-700">Prompts & Training</h4>
+                                <p class="text-slate-600">The quality of generative AI output heavily depends on the user's input ("prompt") and the massive datasets used for training. "Prompt engineering" is the art of crafting effective inputs to get desired outputs.</p>
+                            </div>
+                         </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <h3 class="text-2xl font-bold text-slate-800 mb-4">The Growth of Model Size</h3>
+                        <p class="text-slate-600 mb-4">The number of parameters in a model is a rough measure of its complexity and potential capability. This chart shows the exponential increase in parameters for prominent language models.</p>
+                        <div class="chart-container h-96">
+                            <canvas id="modelGrowthChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section: Applications & Impact -->
+            <section id="applications" class="content-section">
+                <h2 class="text-4xl font-bold text-slate-800 mb-4">Applications & Impact on Industries</h2>
+                <p class="text-lg text-slate-600 mb-8 max-w-4xl">
+                    AI is no longer a futuristic concept; it is a transformative force reshaping industries across the globe. From diagnosing diseases to creating art, AI's applications are vast and growing. This section provides an interactive overview of AI's impact. Use the filters to explore specific sectors and click on any card to see a visualization of its projected market growth.
+                </p>
                 <div class="bg-white p-6 rounded-xl shadow-md">
-                    <h3 class="text-2xl font-bold text-slate-800 mb-4">The Growth of Model Size</h3>
-                    <p class="text-slate-600 mb-4">The number of parameters in a model is a rough measure of its complexity and potential capability. This chart shows the exponential increase in parameters for prominent language models.</p>
-                    <div class="chart-container h-96">
-                        <canvas id="modelGrowthChart"></canvas>
+                    <div id="industry-filters" class="flex flex-wrap gap-2 mb-6">
+                        <button class="filter-button bg-slate-200 text-slate-700 font-semibold py-2 px-4 rounded-full active" data-filter="all">All</button>
+                        <button class="filter-button bg-slate-200 text-slate-700 font-semibold py-2 px-4 rounded-full" data-filter="Healthcare">Healthcare</button>
+                        <button class="filter-button bg-slate-200 text-slate-700 font-semibold py-2 px-4 rounded-full" data-filter="Finance">Finance</button>
+                        <button class="filter-button bg-slate-200 text-slate-700 font-semibold py-2 px-4 rounded-full" data-filter="Entertainment">Entertainment</button>
+                        <button class="filter-button bg-slate-200 text-slate-700 font-semibold py-2 px-4 rounded-full" data-filter="Automotive">Automotive</button>
+                    </div>
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6" id="applications-grid">
+                        <!-- Application cards will be injected by JS -->
+                    </div>
+                    <div id="application-chart-container" class="mt-8 hidden">
+                         <h3 class="text-2xl font-bold text-slate-800 mb-4 text-center" id="chart-title"></h3>
+                        <div class="chart-container">
+                            <canvas id="industryGrowthChart"></canvas>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </section>
+            </section>
 
-        <!-- Section: Applications & Impact -->
-        <section id="applications" class="content-section">
-            <h2 class="text-4xl font-bold text-slate-800 mb-4">Applications & Impact on Industries</h2>
-            <p class="text-lg text-slate-600 mb-8 max-w-4xl">
-                AI is no longer a futuristic concept; it is a transformative force reshaping industries across the globe. From diagnosing diseases to creating art, AI's applications are vast and growing. This section provides an interactive overview of AI's impact. Use the filters to explore specific sectors and click on any card to see a visualization of its projected market growth.
-            </p>
-            <div class="bg-white p-6 rounded-xl shadow-md">
-                <div id="industry-filters" class="flex flex-wrap gap-2 mb-6">
-                    <button class="filter-button bg-slate-200 text-slate-700 font-semibold py-2 px-4 rounded-full active" data-filter="all">All</button>
-                    <button class="filter-button bg-slate-200 text-slate-700 font-semibold py-2 px-4 rounded-full" data-filter="Healthcare">Healthcare</button>
-                    <button class="filter-button bg-slate-200 text-slate-700 font-semibold py-2 px-4 rounded-full" data-filter="Finance">Finance</button>
-                    <button class="filter-button bg-slate-200 text-slate-700 font-semibold py-2 px-4 rounded-full" data-filter="Entertainment">Entertainment</button>
-                    <button class="filter-button bg-slate-200 text-slate-700 font-semibold py-2 px-4 rounded-full" data-filter="Automotive">Automotive</button>
+            <!-- Section: Ethical Considerations -->
+            <section id="ethics" class="content-section">
+                <h2 class="text-4xl font-bold text-slate-800 mb-4">Ethical Considerations & Challenges</h2>
+                <p class="text-lg text-slate-600 mb-8 max-w-4xl">
+                    The rapid advancement of AI brings a host of complex ethical questions and societal challenges that we must address. Developing AI responsibly requires careful consideration of its potential negative impacts. This section explores the most critical ethical dilemmas, from algorithmic bias to the future of work. Click on each topic to expand and learn more about the associated challenges and the ongoing dialogue surrounding them.
+                </p>
+                <div id="accordion-container" class="space-y-4 max-w-4xl mx-auto">
+                    <!-- Accordion items injected by JS -->
                 </div>
-                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6" id="applications-grid">
-                    <!-- Application cards will be injected by JS -->
-                </div>
-                <div id="application-chart-container" class="mt-8 hidden">
-                     <h3 class="text-2xl font-bold text-slate-800 mb-4 text-center" id="chart-title"></h3>
-                    <div class="chart-container">
-                        <canvas id="industryGrowthChart"></canvas>
+            </section>
+
+            <!-- Section: The Future of AI -->
+            <section id="future" class="content-section">
+                <h2 class="text-4xl font-bold text-slate-800 mb-4">The Future of AI</h2>
+                <p class="text-lg text-slate-600 mb-8 max-w-4xl">
+                    Looking ahead, the trajectory of AI promises even more profound changes to our world. The pursuit of Artificial General Intelligence (AGI), the deepening of human-AI collaboration, and breakthroughs in new algorithms will define the next era. This section outlines the key trends and future directions that researchers and developers are exploring, painting a picture of what a future integrated with advanced AI might look like.
+                </p>
+                <div class="bg-white p-8 rounded-xl shadow-md">
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div>
+                            <h3 class="text-2xl font-bold text-slate-800 mb-4">Key Future Trends</h3>
+                            <ul class="space-y-4">
+                                <li class="flex items-start">
+                                    <span class="text-xl font-bold text-slate-500 mr-4 mt-1">&#10148;</span>
+                                    <div>
+                                        <h4 class="font-semibold text-lg text-slate-700">Explainable AI (XAI)</h4>
+                                        <p class="text-slate-600">Developing AI models that can explain their decisions and processes in human-understandable terms, moving away from "black box" systems to build trust and accountability.</p>
+                                    </div>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-xl font-bold text-slate-500 mr-4 mt-1">&#10148;</span>
+                                    <div>
+                                        <h4 class="font-semibold text-lg text-slate-700">AI for Scientific Discovery</h4>
+                                        <p class="text-slate-600">Using AI to accelerate research in fields like medicine, climate science, and material science by analyzing vast datasets and modeling complex systems.</p>
+                                    </div>
+                                </li>
+                                 <li class="flex items-start">
+                                    <span class="text-xl font-bold text-slate-500 mr-4 mt-1">&#10148;</span>
+                                    <div>
+                                        <h4 class="font-semibold text-lg text-slate-700">Human-AI Collaboration</h4>
+                                        <p class="text-slate-600">Shifting the focus from AI as a replacement for humans to AI as a tool that augments human creativity, decision-making, and productivity.</p>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                        <div>
+                             <h3 class="text-2xl font-bold text-slate-800 mb-4">The Road to AGI</h3>
+                            <p class="text-slate-600 mb-4">The path to Artificial General Intelligence is one of the most significant and challenging goals in computer science. It requires breakthroughs in areas like:</p>
+                            <ul class="list-disc list-inside text-slate-600 space-y-2">
+                                <li><strong>Common Sense Reasoning:</strong> Imbuing AI with the implicit understanding of the world that humans possess.</li>
+                                <li><strong>Transfer Learning:</strong> The ability to apply knowledge gained from one task to a different, unrelated task.</li>
+                                <li><strong>Robustness & Adaptability:</strong> Creating systems that can handle novel situations and unforeseen circumstances gracefully.</li>
+                            </ul>
+                             <p class="text-slate-600 mt-4">While true AGI is likely still decades away, each step towards it unlocks more powerful and capable forms of narrow AI.</p>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </section>
+            </section>
 
-        <!-- Section: Ethical Considerations -->
-        <section id="ethics" class="content-section">
-            <h2 class="text-4xl font-bold text-slate-800 mb-4">Ethical Considerations & Challenges</h2>
-            <p class="text-lg text-slate-600 mb-8 max-w-4xl">
-                The rapid advancement of AI brings a host of complex ethical questions and societal challenges that we must address. Developing AI responsibly requires careful consideration of its potential negative impacts. This section explores the most critical ethical dilemmas, from algorithmic bias to the future of work. Click on each topic to expand and learn more about the associated challenges and the ongoing dialogue surrounding them.
-            </p>
-            <div id="accordion-container" class="space-y-4 max-w-4xl mx-auto">
-                <!-- Accordion items injected by JS -->
-            </div>
-        </section>
-
-        <!-- Section: The Future of AI -->
-        <section id="future" class="content-section">
-            <h2 class="text-4xl font-bold text-slate-800 mb-4">The Future of AI</h2>
-            <p class="text-lg text-slate-600 mb-8 max-w-4xl">
-                Looking ahead, the trajectory of AI promises even more profound changes to our world. The pursuit of Artificial General Intelligence (AGI), the deepening of human-AI collaboration, and breakthroughs in new algorithms will define the next era. This section outlines the key trends and future directions that researchers and developers are exploring, painting a picture of what a future integrated with advanced AI might look like.
-            </p>
-            <div class="bg-white p-8 rounded-xl shadow-md">
-                <div class="grid md:grid-cols-2 gap-8">
-                    <div>
-                        <h3 class="text-2xl font-bold text-slate-800 mb-4">Key Future Trends</h3>
-                        <ul class="space-y-4">
-                            <li class="flex items-start">
-                                <span class="text-xl font-bold text-slate-500 mr-4 mt-1">&#10148;</span>
-                                <div>
-                                    <h4 class="font-semibold text-lg text-slate-700">Explainable AI (XAI)</h4>
-                                    <p class="text-slate-600">Developing AI models that can explain their decisions and processes in human-understandable terms, moving away from "black box" systems to build trust and accountability.</p>
-                                </div>
-                            </li>
-                            <li class="flex items-start">
-                                <span class="text-xl font-bold text-slate-500 mr-4 mt-1">&#10148;</span>
-                                <div>
-                                    <h4 class="font-semibold text-lg text-slate-700">AI for Scientific Discovery</h4>
-                                    <p class="text-slate-600">Using AI to accelerate research in fields like medicine, climate science, and material science by analyzing vast datasets and modeling complex systems.</p>
-                                </div>
-                            </li>
-                             <li class="flex items-start">
-                                <span class="text-xl font-bold text-slate-500 mr-4 mt-1">&#10148;</span>
-                                <div>
-                                    <h4 class="font-semibold text-lg text-slate-700">Human-AI Collaboration</h4>
-                                    <p class="text-slate-600">Shifting the focus from AI as a replacement for humans to AI as a tool that augments human creativity, decision-making, and productivity.</p>
-                                </div>
-                            </li>
-                        </ul>
-                    </div>
-                    <div>
-                         <h3 class="text-2xl font-bold text-slate-800 mb-4">The Road to AGI</h3>
-                        <p class="text-slate-600 mb-4">The path to Artificial General Intelligence is one of the most significant and challenging goals in computer science. It requires breakthroughs in areas like:</p>
-                        <ul class="list-disc list-inside text-slate-600 space-y-2">
-                            <li><strong>Common Sense Reasoning:</strong> Imbuing AI with the implicit understanding of the world that humans possess.</li>
-                            <li><strong>Transfer Learning:</strong> The ability to apply knowledge gained from one task to a different, unrelated task.</li>
-                            <li><strong>Robustness & Adaptability:</strong> Creating systems that can handle novel situations and unforeseen circumstances gracefully.</li>
-                        </ul>
-                         <p class="text-slate-600 mt-4">While true AGI is likely still decades away, each step towards it unlocks more powerful and capable forms of narrow AI.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-    </main>
+        </main>
+    </div>
     
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -353,6 +402,22 @@
             let mlChartInstance;
             let modelGrowthChartInstance;
             let industryGrowthChartInstance;
+            
+            // Mobile Menu Elements
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const sidebar = document.getElementById('sidebar');
+            const sidebarOverlay = document.getElementById('sidebar-overlay');
+
+            const toggleSidebar = () => {
+                sidebar.classList.toggle('open');
+                sidebarOverlay.classList.toggle('open');
+                // Disable background scrolling when sidebar is open
+                document.body.style.overflow = sidebar.classList.contains('open') ? 'hidden' : 'auto';
+            };
+
+            mobileMenuButton.addEventListener('click', toggleSidebar);
+            sidebarOverlay.addEventListener('click', toggleSidebar);
+
 
             // Data for charts and dynamic content
             const timelineData = [
@@ -435,6 +500,11 @@
                     const sectionId = e.target.closest('a').dataset.section;
                     navigateToSection(sectionId);
                     document.getElementById('main-content').scrollTop = 0;
+                    
+                    // Close sidebar on mobile click
+                    if (window.innerWidth < 768) {
+                        toggleSidebar();
+                    }
                 });
             });
 
@@ -522,18 +592,41 @@
             // Model Growth Chart
             function renderModelGrowthChart() {
                 const ctx = document.getElementById('modelGrowthChart').getContext('2d');
+                if (modelGrowthChartInstance) {
+                    modelGrowthChartInstance.destroy();
+                }
                 modelGrowthChartInstance = new Chart(ctx, {
                     type: 'line',
-                    data: modelGrowthData,
+                    data: {
+                        labels: modelGrowthData.labels,
+                        datasets: [{
+                            label: modelGrowthData.datasets[0].label,
+                            data: modelGrowthData.datasets[0].data.map(d => Math.log10(d * 1000000000)), // Convert Billions to actual value for log scale calculation in UI
+                            borderColor: '#334155',
+                            backgroundColor: 'rgba(51, 65, 85, 0.1)',
+                            fill: true,
+                            tension: 0.3
+                        }]
+                    },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
                         scales: {
                             y: {
-                                type: 'logarithmic',
+                                type: 'linear', // Use linear scale but relabel manually to show log scale effect
                                 title: {
                                     display: true,
-                                    text: 'Parameters (Billions, Log Scale)'
+                                    text: 'Parameters (Billions - Logarithmic Scale Effect)'
+                                },
+                                ticks: {
+                                    callback: function(value, index, values) {
+                                        // This creates the visual effect of a logarithmic scale on a linear axis
+                                        const originalData = modelGrowthData.datasets[0].data;
+                                        if (index < originalData.length) {
+                                            return originalData[index] + 'B';
+                                        }
+                                        return '';
+                                    }
                                 }
                             },
                             x: {
@@ -584,8 +677,11 @@
                 const card = e.target.closest('.application-card');
                 if (card) {
                     const category = card.dataset.category;
-                    const data = applicationsData.find(app => app.category === category);
-                    renderIndustryChart(category, data.growth);
+                    // Find the growth data for the clicked category (using the first match)
+                    const appData = applicationsData.find(app => app.category === category);
+                    if (appData) {
+                        renderIndustryChart(category, appData.growth);
+                    }
                 }
             });
             
@@ -612,9 +708,19 @@
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        plugins: { legend: { display: false } }
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Market Size (in Billions USD)'
+                                }
+                            }
+                        }
                     }
                 });
+                 // Smooth scroll to the chart when it appears
                  container.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
 
