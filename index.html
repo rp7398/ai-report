@@ -10,11 +10,11 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Chosen Palette: Warm Neutrals & Slate -->
-    <!-- Application Structure Plan: The application uses a fixed, desktop-style sidebar for large screens. On mobile (md breakpoint and below), the sidebar is converted into an off-canvas, full-height overlay controlled by a hamburger button in a fixed mobile header. This structure was chosen to guarantee full screen width for the main content on mobile devices, preventing the overlap and horizontal scrolling issue previously reported. Navigation is non-linear and interactive elements encourage exploration across all screen sizes. -->
+    <!-- Application Structure Plan: The application uses a fixed, desktop-style sidebar for large screens. On mobile (md breakpoint and below), the sidebar is converted into an off-canvas, full-height overlay controlled by a hamburger button in a fixed mobile header. This ensures full content width and prevents overlap. Key interactions include: Tabs (now responsive using flex-wrap for small screens to prevent overlap), filterable grids, and charts that dynamically update. This user-centric design prioritizes clarity and exploration across all screen sizes. -->
     <!-- Visualization & Content Choices: 
         - History Timeline (Inform): HTML/CSS/JS -> User clicks to reveal info on key events. Justification: More engaging than a static list.
         - AI Scopes (Organize): Nested HTML divs -> Visually shows relationship between AI, ML, DL. Justification: Immediately clarifies hierarchy.
-        - ML Types (Compare): Tabs + Donut Charts (Chart.js) -> Compare use-cases for Supervised, Unsupervised, and Reinforcement learning. Justification: Direct comparison of complex topics in a simple visual format.
+        - ML Types (Compare): Tabs + Donut Charts (Chart.js) -> Compare use-cases for Supervised, Unsupervised, and Reinforcement learning. Tabs are now fully responsive to prevent overlap. Justification: Direct comparison of complex topics in a simple visual format.
         - Model Growth (Change): Line Chart (Chart.js) -> Shows exponential growth of LLM parameters. Justification: Effectively visualizes the trend of increasing model complexity.
         - Industry Applications (Organize/Inform): Filterable Grid of Cards + Bar Charts (Chart.js) -> Users filter by industry to see specific applications and market data. Justification: Allows personalized exploration of AI's impact.
         - Ethical Issues (Organize/Inform): Accordion UI -> Presents complex ethical topics in digestible sections. Justification: Avoids overwhelming the user with dense text.
@@ -100,6 +100,25 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #64748B;
         }
+        /* Fix for ML Tabs on Mobile */
+        .tab-button {
+            /* Ensure buttons can shrink and grow, and have equal size in desktop view */
+            flex: 1 1 auto;
+            min-width: 0; 
+            white-space: nowrap; /* Prevents text wrap on tab names */
+        }
+        @media (max-width: 500px) {
+            /* On very small screens, allow buttons to wrap to new lines */
+            .ml-tab-bar {
+                flex-wrap: wrap; 
+            }
+            .ml-tab-bar button {
+                flex: 1 1 50%; /* Make them take up half the width */
+                box-sizing: border-box;
+                margin-top: 4px;
+            }
+        }
+
         .tab-button.active {
             background-color: #334155;
             color: #F8F7F4;
@@ -234,35 +253,36 @@
                     Machine Learning (ML) is the engine powering most modern AI advancements. Instead of being explicitly programmed, ML algorithms learn patterns from data. This section explores the three primary paradigms of machine learning. Use the tabs below to switch between Supervised, Unsupervised, and Reinforcement Learning, and see a breakdown of their common applications in the accompanying chart.
                 </p>
                 <div class="bg-white p-6 rounded-xl shadow-md">
-                    <div class="flex border-b border-slate-300 mb-4">
-                        <button class="tab-button py-2 px-4 font-semibold text-slate-600 active" data-tab="supervised">Supervised Learning</button>
-                        <button class="tab-button py-2 px-4 font-semibold text-slate-600" data-tab="unsupervised">Unsupervised Learning</button>
-                        <button class="tab-button py-2 px-4 font-semibold text-slate-600" data-tab="reinforcement">Reinforcement Learning</button>
+                    <!-- CORRECTED ML Tab Bar: Uses custom class to allow wrapping on small screens -->
+                    <div class="ml-tab-bar flex border-b border-slate-300 mb-4 -mx-1">
+                        <button class="tab-button py-2 px-4 font-semibold text-slate-600 active mx-1 rounded-t-lg" data-tab="supervised">Supervised Learning</button>
+                        <button class="tab-button py-2 px-4 font-semibold text-slate-600 mx-1 rounded-t-lg" data-tab="unsupervised">Unsupervised Learning</button>
+                        <button class="tab-button py-2 px-4 font-semibold text-slate-600 mx-1 rounded-t-lg" data-tab="reinforcement">Reinforcement Learning</button>
                     </div>
                     <div class="grid lg:grid-cols-2 gap-8 items-center">
                         <div>
                             <div id="supervised-content" class="tab-content">
                                 <h3 class="text-2xl font-bold text-slate-700 mb-2">Learning from Labeled Data</h3>
-                                <p class="text-slate-600">In supervised learning, the algorithm is trained on a dataset where each data point is "labeled" with the correct output. It's like a student learning with a teacher and an answer key. The goal is to learn a mapping function that can predict the output for new, unseen data.</p>
+                                <p class="text-slate-600">In **supervised learning**, the algorithm is trained on a dataset where each data point is "labeled" with the correct output (like having an answer key). It learns a function to predict the output for new, unseen data.</p>
                                 <ul class="list-disc list-inside mt-4 text-slate-600 space-y-1">
-                                    <li><strong>Classification:</strong> Predicting a category (e.g., spam vs. not spam).</li>
-                                    <li><strong>Regression:</strong> Predicting a continuous value (e.g., house prices).</li>
+                                    <li>**Classification:** Predicting a category (e.g., spam vs. not spam).</li>
+                                    <li>**Regression:** Predicting a continuous value (e.g., house prices).</li>
                                 </ul>
                             </div>
                             <div id="unsupervised-content" class="tab-content hidden">
                                  <h3 class="text-2xl font-bold text-slate-700 mb-2">Finding Patterns in Unlabeled Data</h3>
-                                <p class="text-slate-600">Here, the algorithm works with data that has no predefined labels. It tries to find hidden patterns, structures, or relationships on its own. It's like a researcher looking for connections in a sea of information without prior guidance.</p>
+                                <p class="text-slate-600">**Unsupervised learning** works with data that has no predefined labels. The algorithm independently discovers hidden patterns, structures, or relationships within the data, acting like a data explorer.</p>
                                 <ul class="list-disc list-inside mt-4 text-slate-600 space-y-1">
-                                    <li><strong>Clustering:</strong> Grouping similar data points together (e.g., customer segmentation).</li>
-                                    <li><strong>Association:</strong> Discovering rules that describe large portions of data (e.g., market basket analysis).</li>
+                                    <li>**Clustering:** Grouping similar data points together (e.g., customer segmentation).</li>
+                                    <li>**Association:** Discovering rules that describe large portions of data (e.g., market basket analysis).</li>
                                 </ul>
                             </div>
                              <div id="reinforcement-content" class="tab-content hidden">
                                 <h3 class="text-2xl font-bold text-slate-700 mb-2">Learning through Trial and Error</h3>
-                                <p class="text-slate-600">This type of learning involves an "agent" that interacts with an environment and learns to take actions to maximize a cumulative reward. It's like training a pet with treats. The agent learns the best strategy (policy) through repeated trial and error.</p>
+                                <p class="text-slate-600">**Reinforcement Learning (RL)** involves an **agent** that interacts with an environment and learns to take actions to maximize a cumulative reward signal. It's a goal-oriented process where the agent learns the best strategy (policy) through repeated trial and error, getting 'rewards' for correct actions.</p>
                                 <ul class="list-disc list-inside mt-4 text-slate-600 space-y-1">
-                                    <li><strong>Game Playing:</strong> Mastering games like Chess or Go.</li>
-                                    <li><strong>Robotics:</strong> Teaching robots to perform complex tasks.</li>
+                                    <li>**Game Playing:** Mastering games like Chess or Go.</li>
+                                    <li>**Robotics:** Teaching robots to perform complex navigation and manipulation tasks.</li>
                                 </ul>
                             </div>
                         </div>
@@ -277,7 +297,7 @@
             <section id="gen-ai" class="content-section">
                 <h2 class="text-4xl font-bold text-slate-800 mb-4">The Generative AI Revolution</h2>
                 <p class="text-lg text-slate-600 mb-8 max-w-4xl">
-                    Generative AI represents a major leap forward, focusing on creating new, original content rather than just analyzing or classifying existing data. This includes text, images, music, and code. This section delves into the models that power this revolution, like Large Language Models (LLMs), and visualizes the staggering growth in their complexity over the past few years.
+                    **Generative AI** represents a major leap forward, focusing on creating new, original content rather than just analyzing or classifying existing data. This includes text, images, music, and code. This section delves into the models that power this revolution, like Large Language Models (LLMs), and visualizes the staggering growth in their complexity over the past few years.
                 </p>
                 <div class="grid lg:grid-cols-2 gap-8">
                     <div class="bg-white p-6 rounded-xl shadow-md">
@@ -285,21 +305,21 @@
                          <div class="space-y-4">
                             <div>
                                 <h4 class="font-semibold text-lg text-slate-700">Large Language Models (LLMs)</h4>
-                                <p class="text-slate-600">LLMs, like GPT-4, are trained on vast amounts of text data to understand and generate human-like language. They are based on the Transformer architecture, which allows them to process long sequences of text and understand context.</p>
+                                <p class="text-slate-600">LLMs, like GPT-4, are trained on vast amounts of text data to understand and generate human-like language. They are based on the **Transformer architecture**, which allows them to process long sequences of text and understand context.</p>
                             </div>
                             <div>
                                 <h4 class="font-semibold text-lg text-slate-700">Diffusion Models</h4>
-                                <p class="text-slate-600">Used for image generation, these models start with random noise and gradually refine it into a coherent image that matches a text prompt. This step-by-step process allows for high-quality, detailed outputs.</p>
+                                <p class="text-slate-600">Used for image generation (e.g., DALL-E, Midjourney), these models start with random noise and gradually refine it into a coherent image that matches a text prompt. This step-by-step process allows for high-quality, detailed outputs.</p>
                             </div>
                              <div>
                                 <h4 class="font-semibold text-lg text-slate-700">Prompts & Training</h4>
-                                <p class="text-slate-600">The quality of generative AI output heavily depends on the user's input ("prompt") and the massive datasets used for training. "Prompt engineering" is the art of crafting effective inputs to get desired outputs.</p>
+                                <p class="text-slate-600">The quality of generative AI output heavily depends on the user's input ("**prompt**") and the massive datasets used for training. "**Prompt engineering**" is the art of crafting effective inputs to get desired outputs.</p>
                             </div>
                          </div>
                     </div>
                     <div class="bg-white p-6 rounded-xl shadow-md">
                         <h3 class="text-2xl font-bold text-slate-800 mb-4">The Growth of Model Size</h3>
-                        <p class="text-slate-600 mb-4">The number of parameters in a model is a rough measure of its complexity and potential capability. This chart shows the exponential increase in parameters for prominent language models.</p>
+                        <p class="text-slate-600 mb-4">The number of **parameters** in a model is a rough measure of its complexity and potential capability. This chart shows the exponential increase in parameters for prominent language models.</p>
                         <div class="chart-container h-96">
                             <canvas id="modelGrowthChart"></canvas>
                         </div>
@@ -348,7 +368,7 @@
             <section id="future" class="content-section">
                 <h2 class="text-4xl font-bold text-slate-800 mb-4">The Future of AI</h2>
                 <p class="text-lg text-slate-600 mb-8 max-w-4xl">
-                    Looking ahead, the trajectory of AI promises even more profound changes to our world. The pursuit of Artificial General Intelligence (AGI), the deepening of human-AI collaboration, and breakthroughs in new algorithms will define the next era. This section outlines the key trends and future directions that researchers and developers are exploring, painting a picture of what a future integrated with advanced AI might look like.
+                    Looking ahead, the trajectory of AI promises even more profound changes to our world. The pursuit of **Artificial General Intelligence (AGI)**, the deepening of human-AI collaboration, and breakthroughs in new algorithms will define the next era. This section outlines the key trends and future directions that researchers and developers are exploring, painting a picture of what a future integrated with advanced AI might look like.
                 </p>
                 <div class="bg-white p-8 rounded-xl shadow-md">
                     <div class="grid md:grid-cols-2 gap-8">
@@ -359,7 +379,7 @@
                                     <span class="text-xl font-bold text-slate-500 mr-4 mt-1">&#10148;</span>
                                     <div>
                                         <h4 class="font-semibold text-lg text-slate-700">Explainable AI (XAI)</h4>
-                                        <p class="text-slate-600">Developing AI models that can explain their decisions and processes in human-understandable terms, moving away from "black box" systems to build trust and accountability.</p>
+                                        <p class="text-slate-600">Developing AI models that can explain their decisions and processes in human-understandable terms, moving away from "**black box**" systems to build trust and accountability.</p>
                                     </div>
                                 </li>
                                 <li class="flex items-start">
@@ -373,7 +393,7 @@
                                     <span class="text-xl font-bold text-slate-500 mr-4 mt-1">&#10148;</span>
                                     <div>
                                         <h4 class="font-semibold text-lg text-slate-700">Human-AI Collaboration</h4>
-                                        <p class="text-slate-600">Shifting the focus from AI as a replacement for humans to AI as a tool that augments human creativity, decision-making, and productivity.</p>
+                                        <p class="text-slate-600">Shifting the focus from AI as a replacement for humans to AI as a tool that **augments** human creativity, decision-making, and productivity.</p>
                                     </div>
                                 </li>
                             </ul>
@@ -382,9 +402,9 @@
                              <h3 class="text-2xl font-bold text-slate-800 mb-4">The Road to AGI</h3>
                             <p class="text-slate-600 mb-4">The path to Artificial General Intelligence is one of the most significant and challenging goals in computer science. It requires breakthroughs in areas like:</p>
                             <ul class="list-disc list-inside text-slate-600 space-y-2">
-                                <li><strong>Common Sense Reasoning:</strong> Imbuing AI with the implicit understanding of the world that humans possess.</li>
-                                <li><strong>Transfer Learning:</strong> The ability to apply knowledge gained from one task to a different, unrelated task.</li>
-                                <li><strong>Robustness & Adaptability:</strong> Creating systems that can handle novel situations and unforeseen circumstances gracefully.</li>
+                                <li>**Common Sense Reasoning:** Imbuing AI with the implicit understanding of the world that humans possess.</li>
+                                <li>**Transfer Learning:** The ability to apply knowledge gained from one task to a different, unrelated task.</li>
+                                <li>**Robustness & Adaptability:** Creating systems that can handle novel situations and unforeseen circumstances gracefully.</li>
                             </ul>
                              <p class="text-slate-600 mt-4">While true AGI is likely still decades away, each step towards it unlocks more powerful and capable forms of narrow AI.</p>
                         </div>
@@ -449,11 +469,7 @@
                 labels: ['2018 (BERT)', '2019 (GPT-2)', '2020 (GPT-3)', '2022 (PaLM)', '2023 (GPT-4)'],
                 datasets: [{
                     label: 'Parameters (in Billions)',
-                    data: [0.34, 1.5, 175, 540, 1760],
-                    borderColor: '#334155',
-                    backgroundColor: 'rgba(51, 65, 85, 0.1)',
-                    fill: true,
-                    tension: 0.3
+                    data: [0.34, 1.5, 175, 540, 1760]
                 }]
             };
 
@@ -595,13 +611,19 @@
                 if (modelGrowthChartInstance) {
                     modelGrowthChartInstance.destroy();
                 }
+
+                // Prepare data for logarithmic scale effect
+                const logData = modelGrowthData.datasets[0].data.map(d => Math.log10(d));
+                const logTicks = [Math.log10(0.1), Math.log10(1), Math.log10(10), Math.log10(100), Math.log10(1000)];
+                const logLabels = ['0.1B', '1B', '10B', '100B', '1T']; // 1T=1000B
+
                 modelGrowthChartInstance = new Chart(ctx, {
                     type: 'line',
                     data: {
                         labels: modelGrowthData.labels,
                         datasets: [{
                             label: modelGrowthData.datasets[0].label,
-                            data: modelGrowthData.datasets[0].data.map(d => Math.log10(d * 1000000000)), // Convert Billions to actual value for log scale calculation in UI
+                            data: modelGrowthData.datasets[0].data,
                             borderColor: '#334155',
                             backgroundColor: 'rgba(51, 65, 85, 0.1)',
                             fill: true,
@@ -613,19 +635,20 @@
                         maintainAspectRatio: false,
                         scales: {
                             y: {
-                                type: 'linear', // Use linear scale but relabel manually to show log scale effect
+                                type: 'logarithmic',
+                                min: 0.1, // Start log scale near zero to show small models
                                 title: {
                                     display: true,
-                                    text: 'Parameters (Billions - Logarithmic Scale Effect)'
+                                    text: 'Parameters (Billions - Logarithmic Scale)'
                                 },
                                 ticks: {
                                     callback: function(value, index, values) {
-                                        // This creates the visual effect of a logarithmic scale on a linear axis
-                                        const originalData = modelGrowthData.datasets[0].data;
-                                        if (index < originalData.length) {
-                                            return originalData[index] + 'B';
+                                        if (value >= 1) {
+                                            return value.toLocaleString() + 'B';
+                                        } else if (value >= 0.1) {
+                                            return (value * 1000).toFixed(0) + 'M'; // Show millions for values < 1B
                                         }
-                                        return '';
+                                        return null;
                                     }
                                 }
                             },
